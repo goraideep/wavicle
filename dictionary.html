@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictionary | SignSpeak</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8fa;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #d48ab3;
+      padding: 12px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    /* Page Title */
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+      color: #222;
+    }
+
+    p {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    /* Cards */
+    .card-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 180px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card b {
+      display: block;
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      padding-top: 80px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
+    }
+
+    .modal-content {
+      margin: auto;
+      display: block;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #ffcccc;
+    }
+
+    footer {
+      background-color: #d48ab3;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div>
+      <a href="#"><b>SignSpeak</b></a>
+    </div>
+    <div>
+      <a href="#">Home</a>
+      <a href="#">Live Recognition</a>
+      <a href="#">Dictionary</a>
+      <a href="#">Translate</a>
+      <a href="#">About</a>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <h1>Sign Language Dictionary</h1>
+  <p>Click on a card to see the meaning of each gesture.</p>
+
+  <!-- Cards -->
+  <div class="card-container">
+    <!-- Existing Cards -->
+    <div class="card" onclick="showSign('hello.png', 'Hello')"><b>Hello</b></div>
+    <div class="card" onclick="showSign('thankyou.png', 'Thank You')"><b>Thank You</b></div>
+    <div class="card" onclick="showSign('bye.png', 'Bye')"><b>Bye</b></div>
+
+    <!-- New Cards -->
+    <div class="card" onclick="showSign('eat.png', 'Eat')"><b>Eat</b></div>
+    <div class="card" onclick="showSign('sorry.png', 'Sorry')"><b>Sorry</b></div>
+    <div class="card" onclick="showSign('excuse_me.png', 'Excuse Me')"><b>Excuse Me</b></div>
+    <div class="card" onclick="showSign('help.png', 'Help')"><b>Help</b></div>
+    <div class="card" onclick="showSign('good.png', 'Good')"><b>Good</b></div>
+    <div class="card" onclick="showSign('i.png', 'I')"><b>I</b></div>
+    <div class="card" onclick="showSign('i_love_you.png', 'I Love You')"><b>I Love You</b></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="signModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="signImage" src="" alt="Sign Gesture">
+    <p id="signText" style="color:white; text-align:center; font-size:20px; margin-top:10px;"></p>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 SignSpeak | Made with ❤️ by Team CommuniCode
+  </footer>
+
+  <!-- Script -->
+  <script>
+    function showSign(image, text) {
+      document.getElementById("signImage").src = "images/" + image;
+      document.getElementById("signText").textContent = text;
+      document.getElementById("signModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("signModal").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>

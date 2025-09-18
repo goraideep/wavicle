@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignSpeak - Live Recognition</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: #f5f5f7;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .navbar {
+      background-color: #d48ab2;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #bbb;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .navbar .brand {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      text-decoration: none;
+      color: #4b0055;
+    }
+
+    .navbar .logo {
+      height: 32px;
+      margin-right: 10px;
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar ul li a {
+      color: #330066;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .navbar ul li a.active,
+    .navbar ul li a:hover {
+      color: #5e117a;
+      text-decoration: underline;
+    }
+
+    #theme-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .card-container {
+      max-width: 960px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .webcam-card {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .camera-frame {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    video, canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 2;
+    }
+
+    video {
+      position: relative;
+      z-index: 1;
+      border: 3px solid #d48ab2;
+    }
+
+    #output {
+      margin-top: 1.5rem;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #5a007a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      color: #555;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="index.html" class="brand">
+    <img src="assets/logo.png" alt="SignSpeak Logo" class="logo" />
+    <span>SignSpeak</span>
+  </a>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="translate.html">Translate</a></li>
+    <li><a href="dictionary.html">Dictionary</a></li>
+    <li><a href="live.html" class="active">Live</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button id="theme-toggle">🌙</button>
+</nav>
+
+<!-- Webcam Section -->
+<section class="card-container">
+  <div class="webcam-card">
+    <h2>Live Gesture Recognition</h2>
+    <p>Realtime sign detection using your webcam and on-device AI</p>
+
+    <div class="camera-frame">
+      <video id="video" autoplay muted playsinline></video>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="output">Initializing...</div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <small>© 2025 SignSpeak | Made with ❤️ by Team CommuniCode</small>
+</footer>
+
+<!-- MediaPipe Hands + Drawing Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+<script>
+  const videoElement = document.getElementById("video");
+  const canvasElement = document.getElementById("canvas");
+  const canvasCtx = canvasElement.getContext("2d");
+  const outputText = document.getElementById("output");
+
+  let prevWrist = null;
+  let motionCounter = 0;
+
+  function resizeCanvas() {
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+  }
+
+  function isFingerUp(lm, tip, pip) {
+    return lm[tip].y + 0.02 < lm[pip].y;
+  }
+
+  const hands = new Hands({
+    locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+  });
+
+  hands.onResults(results => {
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      const lm = results.multiHandLandmarks[0];
+      drawConnectors(canvasCtx, lm, HAND_CONNECTIONS, { color: '#d48ab2', lineWidth: 2 });
+      drawLandmarks(canvasCtx, lm, { color: '#5e117a', lineWidth: 1 });
+
+      const wrist = lm[0];
+      const thumbUp = lm[4].y + 0.02 < lm[3].y;
+      const thumbDown = lm[4].y > lm[3].y + 0.01;
+      const indexUp = isFingerUp(lm, 8, 6);
+      const middleUp = isFingerUp(lm, 12, 10);
+      const ringUp = isFingerUp(lm, 16, 14);
+      const pinkyUp = isFingerUp(lm, 20, 18);
+
+      let gesture = "✋ Hand Detected";
+
+      if (indexUp && middleUp && !ringUp && !pinkyUp && !thumbUp) {
+        gesture = "✌️ Peace";
+      } else if (pinkyUp && !indexUp && !middleUp && !ringUp && thumbDown) {
+        gesture = "🙏 Sorry";
+      } else if (!thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp) {
+        gesture = "🆘 Help";
+      } else if (!indexUp && !middleUp && !ringUp && !pinkyUp && thumbUp) {
+        gesture = lm[4].y < wrist.y ? "👍 Good" : "👎 Thumbs Down";
+      } else if (indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp) {
+        gesture = "👆 I / Myself";
+      } else if (thumbUp && indexUp && pinkyUp && !middleUp && !ringUp) {
+        gesture = "🤟 I Love You";
+      } else if (indexUp && middleUp && !thumbUp && !ringUp && !pinkyUp) {
+        gesture = "🥤 Thirsty";
+      } else if (thumbUp && indexUp && middleUp && ringUp && pinkyUp) {
+        if (prevWrist) {
+          const dy = wrist.y - prevWrist.y;
+          const dz = wrist.z - prevWrist.z;
+          if (Math.abs(dy) > 0.01 || Math.abs(dz) > 0.01) {
+            motionCounter++;
+          } else {
+            motionCounter = 0;
+          }
+          if (motionCounter > 3) {
+            gesture = "🙏 Thank You";
+            motionCounter = 0;
+          } else {
+            gesture = "👋 Hello";
+          }
+        } else {
+          gesture = "👋 Hello";
+        }
+      }
+
+      outputText.innerText = gesture;
+      prevWrist = wrist;
+    } else {
+      outputText.innerText = "No Hand Detected";
+    }
+
+    canvasCtx.restore();
+  });
+
+  const camera = new Camera(videoElement, {
+    onFrame: async () => {
+      if (videoElement.videoWidth) resizeCanvas();
+      await hands.send({ image: videoElement });
+    },
+    width: 640,
+    height: 480
+  });
+
+  camera.start();
+</script>
+
+</body>
+</html>

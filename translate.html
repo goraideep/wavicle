@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translate | SignSpeak</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      color: #222;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #121212;
+      color: #eee;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e1e1e;
+      padding: 10px 20px;
+      color: white;
+    }
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+    }
+    .logo {
+      height: 40px;
+    }
+    #theme-toggle {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .translate-section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .translate-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .translate-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    body.dark .translate-card {
+      background: #1e1e1e;
+      color: white;
+    }
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .output #gesture-box {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      min-height: 180px;
+    }
+
+    .ai-assistant {
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .chat-box {
+      background: #eee;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 10px;
+      border-radius: 8px;
+      height: 200px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    body.dark .chat-box {
+      background: #2a2a2a;
+    }
+
+    .chat-input {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .chat-input input {
+      width: 300px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #1e1e1e;
+      color: white;
+      margin-top: 40px;
+    }
+
+    img.sign-gesture {
+      height: 150px;
+      margin: 10px;
+    }
+
+    @media (max-width: 700px) {
+      .translate-card {
+        width: 90%;
+      }
+      .chat-input input {
+        width: 70%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <img src="https://via.placeholder.com/100x40?text=Logo" alt="Logo" class="logo" />
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Live Recognition</a></li>
+      <li><a href="#">Dictionary</a></li>
+      <li><a href="#">Translate</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button id="theme-toggle">🌙</button>
+  </nav>
+
+  <!-- Translate Section -->
+  <section class="translate-section">
+    <h1>AI Powered Translator</h1>
+    <p>Type or speak and get animated sign gestures instantly.</p>
+
+    <div class="translate-container">
+      <!-- Input Card -->
+      <div class="translate-card">
+        <h2>Enter Text</h2>
+        <textarea id="text-input" placeholder="Type something..." rows="5"></textarea>
+        <button onclick="translateText()">Translate</button>
+        <button onclick="startSpeech()">🎤 Speak</button>
+      </div>
+
+      <!-- Output Card -->
+      <div class="translate-card output">
+        <h2>Animated Gestures</h2>
+        <div id="gesture-box">
+          <p class="placeholder">Translation will appear here...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Assistant -->
+  <section class="ai-assistant">
+    <h2>🤖 AI Assistant</h2>
+    <div class="chat-box" id="chat-box">
+      <p><strong>AI:</strong> Hi! Type something and I’ll help you with translation tips.</p>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Ask me anything..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Made with ❤️ by Team CommuniCode</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    });
+
+    // Translate text to local gesture GIFs
+    function translateText() {
+      const input = document.getElementById("text-input").value.trim();
+      const gestureBox = document.getElementById("gesture-box");
+      gestureBox.innerHTML = "";
+
+      if (!input) {
+        gestureBox.innerHTML = "<p>Please enter some text.</p>";
+        return;
+      }
+
+      const words = input.toLowerCase().split(/\s+/);
+      console.log("Translating:", words);
+
+      words.forEach(word => {
+        const img = document.createElement("img");
+        img.src = `assets/signs/${word}.gif`;
+        img.alt = word;
+        img.className = "sign-gesture";
+
+        img.onerror = () => {
+          console.warn(`Image not found: ${word}.gif`);
+          img.src = "assets/signs/default.gif";
+          img.alt = "Unknown";
+        };
+
+        gestureBox.appendChild(img);
+      });
+    }
+
+    // Speech Recognition
+    function startSpeech() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const speechResult = event.results[0][0].transcript;
+        document.getElementById("text-input").value = speechResult;
+        translateText();
+      };
+
+      recognition.onerror = (event) => {
+        alert("Speech recognition error: " + event.error);
+      };
+
+      recognition.start();
+    }
+
+    // AI Assistant
+    function sendMessage() {
+      const input = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const userMsg = input.value.trim();
+      if (!userMsg) return;
+
+      const userBubble = document.createElement("p");
+      userBubble.innerHTML = `<strong>You:</strong> ${userMsg}`;
+      chatBox.appendChild(userBubble);
+
+      const aiBubble = document.createElement("p");
+      aiBubble.innerHTML = `<strong>AI:</strong> ${getAiReply(userMsg)}`;
+      chatBox.appendChild(aiBubble);
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+      input.value = "";
+    }
+
+    function getAiReply(msg) {
+      msg = msg.toLowerCase();
+      if (msg.includes("hello")) return "Try typing 'hello' to see the gesture.";
+      if (msg.includes("love")) return "Type 'love' to see the ❤️ sign.";
+      if (msg.includes("thanks")) return "Try 'thanks' or 'thank you'.";
+      if (msg.includes("help")) return "Type 'help' and see what you get!";
+      return "I'm here to assist. Try typing simple words to translate.";
+    }
+  </script>
+</body>
+</html>

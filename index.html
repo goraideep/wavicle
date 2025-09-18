@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SignSpeak — Home</title>
+
+<!-- favicon -->
+<link rel="icon" type="image/png" href="assets/logo.png">
+
+<!-- your global stylesheet -->
+<link rel="stylesheet" href="style.css">
+
+<!-- load the universal theme / helper script -->
+<script defer src="script.js"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="left">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.png" alt="SignSpeak" class="logo">
+      <span class="brand-text">SignSpeak</span>
+    </a>
+  </div>
+
+  <nav class="navlinks">
+    <a href="index.html" class="active">Home</a>
+    <a href="translate.html">Translate</a>
+    <a href="dictionary.html">Dictionary</a>
+    <a href="live.html">Live</a>
+    <a href="about.html">About</a>
+  </nav>
+
+  <div class="right">
+    <button id="theme-toggle" aria-label="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<main>
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>SignSpeak</h1>
+      <p class="subtitle">AI-powered sign language recognition & translation — private and in-browser.</p>
+      <div class="hero-cta">
+        <a class="cta" href="live.html">🎥 Try Live Recognition</a>
+        <a class="cta ghost" href="dictionary.html">📖 Open Dictionary</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HORIZONTAL CARDS -->
+  <section class="home-cards">
+    <div class="card" onclick="location.href='live.html'">
+      <img src="https://i.pinimg.com/564x/ab/7f/1c/ab7f1c0c8f7190e3f0b4d7ff4f46767a.jpg" alt="Live">
+      <h3>Live Gesture Recognition</h3>
+      <p>Realtime detection using your webcam and on-device AI.</p>
+    </div>
+
+    <div class="card" onclick="location.href='dictionary.html'">
+      <img src="https://i.pinimg.com/564x/12/4f/7e/124f7e92df4ff0c543aab47f91dc97a3.jpg" alt="Dictionary">
+      <h3>Sign Language Dictionary</h3>
+      <p>Clear images and descriptions for common gestures.</p>
+    </div>
+
+    <div class="card" onclick="location.href='translate.html'">
+      <img src="https://i.pinimg.com/564x/8b/6c/d4/8b6cd4c0bcd32a2324e0c72fa158c7e0.jpg" alt="Translate">
+      <h3>Text / Speech → Gestures</h3>
+      <p>Convert words to animated sign demonstrations.</p>
+    </div>
+
+    <div class="card" onclick="location.href='about.html'">
+      <img src="https://i.pinimg.com/564x/30/0e/53/300e53b429c5e23c29aa1b4c4f8ed08f.jpg" alt="About">
+      <h3>About SignSpeak</h3>
+      <p>Our mission, contact and legal information.</p>
+    </div>
+  </section>
+
+  <!-- AI Assistant -->
+  <section class="ai-assistant">
+    <div class="assistant-card">
+      <h3>🤖 AI Assistant</h3>
+      <p class="small">Ask about gestures or how to translate a phrase.</p>
+      <input id="ai-input" placeholder="e.g. How to sign 'thank you'?" />
+      <div class="assistant-actions">
+        <button id="ai-ask">Ask</button>
+        <button id="ai-speak">🔊 Speak</button>
+      </div>
+      <div id="ai-reply" class="ai-reply"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- footer -->
+<footer>
+  <div class="footer-inner">
+    <small>© 2025 SignSpeak</small>
+    <div class="madeby">Made with ❤️ by Team CommuniCode</div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('ai-ask').addEventListener('click',()=> {
+  const q = document.getElementById('ai-input').value.trim().toLowerCase();
+  const out = document.getElementById('ai-reply');
+  if(!q){ out.innerText = "Ask me something about a gesture (e.g. 'hello' or 'thank you')."; return; }
+  const KB = {
+    "hello":"Raise an open hand near your head and move outward — greeting.",
+    "thank you":"Bring fingertips to your chin then move forward — gratitude.",
+    "please":"Flat hand on chest, circular motion — polite request.",
+    "i love you":"Index + little finger + thumb extended (ILY)."
+  };
+  const found = KB[q] || Object.keys(KB).find(k=> q.includes(k));
+  out.innerText = found ? KB[found] : "Sorry — I don't know that yet. Try 'hello' or 'thank you'.";
+});
+
+// speak reply
+document.getElementById('ai-speak').addEventListener('click',() => {
+  const t = document.getElementById('ai-reply').innerText || "Ask me something about sign language.";
+  if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(t); u.lang='en-IN'; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); }
+});
+</script>
+
+</body>
+</html>
